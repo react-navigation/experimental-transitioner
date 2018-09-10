@@ -4,14 +4,11 @@ import {
   createSwitchNavigator,
   createNavigationContainer,
 } from "react-navigation";
-import ExampleA from "./ExampleA";
-import ExampleB from "./ExampleB";
-import ExampleC from "./ExampleC";
-import ExampleD from "./ExampleD";
-import ExampleE from "./ExampleE";
-import ExampleT from "./ExampleT";
-import ExampleS from "./ExampleS";
-import ExampleZ from "./ExampleZ";
+import Fade from "./examples/Fade";
+import Modal from "./examples/Modal";
+import Gesture from "./examples/Gesture";
+import CardStack from "./examples/CardStack";
+import SharedEl from "./examples/SharedEl";
 
 import { Provider as LayoutProvider } from "./LayoutContext";
 
@@ -28,14 +25,11 @@ const Examples = ({ navigation }) => (
 );
 
 const EXAMPLES = {
-  ExampleA,
-  ExampleB,
-  ExampleC,
-  ExampleD,
-  ExampleE,
-  ExampleT,
-  ExampleS,
-  ExampleZ,
+  Fade,
+  Modal,
+  Gesture,
+  CardStack,
+  SharedEl,
 };
 
 const AppNavigator = createSwitchNavigator({
@@ -44,6 +38,11 @@ const AppNavigator = createSwitchNavigator({
 });
 
 const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+// const StatefulAppNavigator = createNavigationContainer(Fade);
+// const StatefulAppNavigator = createNavigationContainer(Modal);
+// const StatefulAppNavigator = createNavigationContainer(Gesture);
+// const StatefulAppNavigator = createNavigationContainer(CardStack);
+// const StatefulAppNavigator = createNavigationContainer(SharedEl);
 
 const App = () => (
   <LayoutProvider style={{ flex: 1 }}>

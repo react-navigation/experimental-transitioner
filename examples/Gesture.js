@@ -4,10 +4,10 @@ import {
   Text as UnstyledText,
   View as UnstyledView,
   StyleSheet,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import { createNavigator, StackRouter } from "react-navigation";
-import { Transitioner } from "./Transitioner";
+import { Transitioner } from "../Transitioner";
 import Animated, { Easing } from "react-native-reanimated";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 const {
@@ -26,6 +26,7 @@ const {
   startClock,
   stopClock,
   eq,
+  debug,
   sub,
   not,
   defined,
@@ -34,45 +35,13 @@ const {
   block,
   call,
   event,
-  and
+  and,
 } = Animated;
 
 const MODAL_TRANSLATE_DIST = 300;
 const TOSS_VELOCITY_MULTIPLIER = 0.2;
 
 const callWhenTrue = (val, callback) => cond(val, call([val], callback));
-
-function runSpring(clock, value, velocity, dest) {
-  const state = {
-    finished: new Value(0),
-    velocity: new Value(0),
-    position: new Value(0),
-    time: new Value(0)
-  };
-
-  const config = {
-    stiffness: 1000,
-    damping: 500,
-    mass: 3,
-    overshootClamping: true,
-    restSpeedThreshold: 0.01,
-    restDisplacementThreshold: 0.01,
-    toValue: new Value(0)
-  };
-
-  return [
-    cond(clockRunning(clock), 0, [
-      set(state.finished, 0),
-      set(state.velocity, velocity),
-      set(state.position, value),
-      set(config.toValue, dest),
-      startClock(clock)
-    ]),
-    spring(clock, state, config),
-    cond(state.finished, stopClock(clock)),
-    state.position
-  ];
-}
 
 class FadeTransition extends React.Component {
   static navigationOptions = {
@@ -85,54 +54,70 @@ class FadeTransition extends React.Component {
       const targetProgress = new Value(0);
       const targetProgressDistance = multiply(
         targetProgress,
-        MODAL_TRANSLATE_DIST
+        MODAL_TRANSLATE_DIST,
       );
       const progressDistance = new Value(0);
       const isAtRest = and(
         not(clockRunning(clock)),
-        neq(gestureState, State.ACTIVE)
+        neq(gestureState, State.ACTIVE),
       );
       const uprightGestureTranslateY = multiply(gestureTranslateY, -1);
       const uprightGestureVelocityY = multiply(gestureVelocityY, -1);
       const lastGestureTranslateY = new Value(0);
       const lastGestureVelocityY = new Value(0);
+      const state = {
+        finished: new Value(0),
+        velocity: new Value(0),
+        position: progressDistance,
+        time: new Value(0),
+      };
+
+      const config = {
+        stiffness: 100,
+        damping: 500,
+        mass: 3,
+        overshootClamping: true,
+        restSpeedThreshold: 0.01,
+        restDisplacementThreshold: 0.01,
+        toValue: targetProgressDistance,
+      };
+
+      const goSpring = [
+        cond(clockRunning(clock), 0, [
+          set(state.finished, 0),
+          set(state.velocity, uprightGestureVelocityY),
+          startClock(clock),
+        ]),
+        spring(clock, state, config),
+        cond(state.finished, stopClock(clock)),
+      ];
+
       const springProgressDistance = block([
+        debug("XXX", state.position),
         cond(
           eq(gestureState, State.ACTIVE),
           [
             stopClock(clock),
-            set(
-              progressDistance,
-              add(
+            debug(
+              "DDD",
+              set(
                 progressDistance,
-                sub(uprightGestureTranslateY, prevGestureTranslateY)
-              )
+                add(
+                  progressDistance,
+                  sub(uprightGestureTranslateY, prevGestureTranslateY),
+                ),
+              ),
             ),
             set(prevGestureTranslateY, uprightGestureTranslateY),
             set(lastGestureTranslateY, uprightGestureTranslateY),
             set(lastGestureVelocityY, uprightGestureVelocityY),
-            progressDistance
           ],
-          [
-            set(prevGestureTranslateY, 0),
-            set(
-              progressDistance,
-              cond(
-                defined(progressDistance),
-                runSpring(
-                  clock,
-                  progressDistance,
-                  uprightGestureVelocityY,
-                  targetProgressDistance
-                ),
-                0
-              )
-            )
-          ]
-        )
+          [set(prevGestureTranslateY, 0), goSpring],
+        ),
+        progressDistance,
       ]);
       let callbacksWaitingForRest = [];
-      const atRestCallback = () => {
+      const whenDoneCallback = () => {
         callbacksWaitingForRest.forEach(cb => cb());
         callbacksWaitingForRest = [];
       };
@@ -148,16 +133,16 @@ class FadeTransition extends React.Component {
         lessThan(
           add(
             lastGestureTranslateY,
-            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityY)
+            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityY),
           ),
-          -100
-        )
+          -100,
+        ),
       );
       const finalDistanceProgress = block([
         springProgressDistance,
-        callWhenTrue(isAtRest, atRestCallback),
+        callWhenTrue(isAtRest, whenDoneCallback),
         callWhenTrue(isClosing, closingCallback),
-        springProgressDistance
+        springProgressDistance,
       ]);
       return {
         ...transition,
@@ -166,14 +151,14 @@ class FadeTransition extends React.Component {
         gestureVelocityY,
         targetProgress,
         progress: divide(finalDistanceProgress, MODAL_TRANSLATE_DIST),
-        waitForRest
+        waitForRest,
       };
     },
     runTransition: async transition => {
       transition.targetProgress.setValue(1);
 
       await transition.waitForRest();
-    }
+    },
   };
   _renderModal = (transform, opacity) => {
     const { navigation } = this.props;
@@ -183,7 +168,7 @@ class FadeTransition extends React.Component {
           <View
             style={{
               ...StyleSheet.absoluteFillObject,
-              backgroundColor: "#0008"
+              backgroundColor: "#0008",
             }}
           />
         </TouchableWithoutFeedback>
@@ -194,7 +179,7 @@ class FadeTransition extends React.Component {
             top: 30,
             right: 30,
             bottom: 30,
-            transform
+            transform,
           }}
         >
           {this.props.children}
@@ -216,7 +201,7 @@ class FadeTransition extends React.Component {
       progress,
       gestureState,
       gestureTranslateY,
-      gestureVelocityY
+      gestureVelocityY,
     } = transition;
     const fromOpacity = fromState.routes.find(r => r.key === myKey) ? 1 : 0;
     const toOpacity = toState.routes.find(r => r.key === myKey) ? 1 : 0;
@@ -229,15 +214,15 @@ class FadeTransition extends React.Component {
       : MODAL_TRANSLATE_DIST;
     opacity = interpolate(progress, {
       inputRange: [0, 1],
-      outputRange: [fromOpacity, toOpacity]
+      outputRange: [fromOpacity, toOpacity],
     });
     transform = [
       {
         translateY: interpolate(progress, {
           inputRange: [0, 1],
-          outputRange: [fromTranslate, toTranslate]
-        })
-      }
+          outputRange: [fromTranslate, toTranslate],
+        }),
+      },
     ];
 
     return (
@@ -246,17 +231,17 @@ class FadeTransition extends React.Component {
         onHandlerStateChange={event([
           {
             nativeEvent: {
-              state: gestureState
-            }
-          }
+              state: gestureState,
+            },
+          },
         ])}
         onGestureEvent={event([
           {
             nativeEvent: {
               translationY: gestureTranslateY,
-              velocityY: gestureVelocityY
-            }
-          }
+              velocityY: gestureVelocityY,
+            },
+          },
         ])}
       >
         {this._renderModal(transform, opacity)}
@@ -320,8 +305,8 @@ const App = createNavigator(
   Transitioner,
   StackRouter({
     HomeScreen,
-    ProfileScreen
-  })
+    ProfileScreen,
+  }),
 );
 
 export default App;

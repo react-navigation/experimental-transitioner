@@ -2,11 +2,11 @@ import React from "react";
 import {
   Button,
   Text as UnstyledText,
-  View as UnstyledView
+  View as UnstyledView,
 } from "react-native";
 import { createNavigator, StackRouter } from "react-navigation";
-import { Transitioner } from "./Transitioner";
-import CardTransition from "./CardTransition";
+import { Transitioner } from "../Transitioner";
+import CardTransition from "../CardTransition";
 
 const View = props => (
   <UnstyledView
@@ -23,8 +23,8 @@ class HomeScreen extends React.Component {
   render() {
     const { navigation } = this.props;
     return (
-      <CardTransition {...this.props} ref={this.props.transitionRef}>
-        <View>
+      <CardTransition {...this.props}>
+        <View style={{ flex: 1, backgroundColor: "blue" }}>
           <Text>Home Screen</Text>
           <Button
             onPress={() => {
@@ -49,7 +49,7 @@ class ProfileScreen extends React.Component {
   render() {
     const { navigation } = this.props;
     return (
-      <CardTransition {...this.props} ref={this.props.transitionRef}>
+      <CardTransition {...this.props}>
         <View>
           <Text>
             {navigation.getParam("name")}
@@ -70,8 +70,8 @@ const App = createNavigator(
   Transitioner,
   StackRouter({
     HomeScreen,
-    ProfileScreen
-  })
+    ProfileScreen,
+  }),
 );
 
 export default App;

@@ -4,7 +4,7 @@ import Animated, { Easing } from "react-native-reanimated";
 import {
   createNavigator,
   StackRouter,
-  NavigationProvider
+  NavigationProvider,
 } from "react-navigation";
 const { timing } = Animated;
 
@@ -74,7 +74,7 @@ const getStateForNavChange = (props, state) => {
       transition: null,
       isTransitioning: false,
       navState: navigation.state,
-      descriptors: props.descriptors
+      descriptors: props.descriptors,
     };
   }
   const fromState = state.navState;
@@ -83,11 +83,18 @@ const getStateForNavChange = (props, state) => {
   const toDescriptors = props.descriptors;
   const transitionOptions = getTransitionOptions(fromState, toState, {
     ...fromDescriptors,
-    ...toDescriptors
+    ...toDescriptors,
   });
   const createTransition =
     transitionOptions.createTransition || defaultCreateTransition;
   const transitionRouteKey = getTransitionOwnerRouteKey(fromState, toState);
+  // if (state.transition && state.transitionRouteKey === transitionRouteKey) {
+  //   return {
+  //     ...state,
+  //     isTransitioning: true,
+  //     navState:
+  //   }
+  // }
   const transition = {
     // allow the screen to define the transition..
     ...createTransition({
@@ -96,28 +103,30 @@ const getStateForNavChange = (props, state) => {
       toState,
       toDescriptors,
       fromDescriptors,
-      transitionRouteKey
+      transitionRouteKey,
     }),
     // ..but also ensure these keys are not forgotten or tampered with
     fromState,
     toState,
     toDescriptors,
     fromDescriptors,
-    transitionRouteKey
+    transitionRouteKey,
   };
   return {
+    transitionRouteKey,
     isTransitioning: true,
     transition,
     navState: fromState,
-    descriptors: fromDescriptors
+    descriptors: fromDescriptors,
   };
 };
 
 export class Transitioner extends React.Component {
   state = {
     transition: null,
+    transitionRouteKey: null,
     navState: this.props.navigation.state,
-    descriptors: this.props.descriptors
+    descriptors: this.props.descriptors,
   };
 
   // never re-assign this!
@@ -139,7 +148,7 @@ export class Transitioner extends React.Component {
     const { toDescriptors, toState } = transition;
     const transitionOptions = getTransitionOptions(navState, toState, {
       ...descriptors,
-      ...toDescriptors
+      ...toDescriptors,
     });
     const { runTransition } = transitionOptions;
     const run = runTransition || defaultRunTransition;
@@ -153,7 +162,7 @@ export class Transitioner extends React.Component {
       this.setState({
         isTransitioning: false,
         navState: toState,
-        descriptors: toDescriptors
+        descriptors: toDescriptors,
       });
       // Also de-reference old screenRefs by replacing this._transitionRefs
       const toKeySet = new Set(toState.routes.map(r => r.key));
@@ -180,7 +189,7 @@ export class Transitioner extends React.Component {
   }
 
   _transitionContext = {
-    getTransition: () => this.state.transition
+    getTransition: () => this.state.transition,
   };
 
   render() {
@@ -219,9 +228,10 @@ export class Transitioner extends React.Component {
                 return {};
               }
               return options.getBehindTransitionAnimatedStyle(transition);
-              // return { opacity: 0.5 };
-            }
+            },
           );
+          let thisScreenTransition = transition;
+          let transitionFromState = null;
           return (
             <Animated.View
               style={[{ ...StyleSheet.absoluteFillObject }, backScreenStyles]}
@@ -230,7 +240,8 @@ export class Transitioner extends React.Component {
             >
               <NavigationProvider value={descriptor.navigation}>
                 <C
-                  transition={transition}
+                  transition={thisScreenTransition}
+                  transitionFromState={transitionFromState}
                   navigation={descriptor.navigation}
                   transitionRef={ref}
                 />

@@ -10,49 +10,43 @@ import {
   Image,
   TouchableHighlight,
   SafeAreaView,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import Animated from "react-native-reanimated";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { createNavigationContainer } from "react-navigation";
-import createTransitionNavigator from "./Transitioner";
-import { Provider, InsetView, KeyboardAvoiding } from "./LayoutContext";
-import BasicModalTransition from "./BasicModalTransition";
-import ScrollModalTransition from "./ScrollModalTransition";
-import CardTransition from "./CardTransition";
-import FadeTransition from "./FadeTransition";
+import createTransitionNavigator from "../Transitioner";
+import { Provider, InsetView, KeyboardAvoiding } from "../LayoutContext";
+import BasicModalTransition from "../BasicModalTransition";
+import CardTransition from "../CardTransition";
+import FadeTransition from "../FadeTransition";
 
-import {
-  SharedView,
-  SharedText,
-  SharedFadeTransition,
-  SharedTranslateTransition
-} from "./Shared";
+import { SharedView, SharedText, SharedFadeTransition } from "../Shared";
 
 const { interpolate, Value, event, divide, multiply } = Animated;
 
 const PRODUCTS = {
   A: {
     image: "https://www.organicfacts.net/wp-content/uploads/blueberries.jpg",
-    name: "Blueberries"
+    name: "Blueberries",
   },
   B: {
     image:
       "https://www.organicfacts.net/wp-content/uploads/sugarinstrawberries.jpg",
-    name: "Strawberries"
+    name: "Strawberries",
   },
   C: {
     image:
       "https://www.organicfacts.net/wp-content/uploads/pineapplecalories.jpg",
-    name: "Pineapple"
-  }
+    name: "Pineapple",
+  },
 };
 
 const ProductPhoto = ({ onPress, style, id }) => {
   const i = (
     <Image
       source={{
-        uri: PRODUCTS[id].image
+        uri: PRODUCTS[id].image,
       }}
       style={{ flex: 1 }}
     />
@@ -92,7 +86,7 @@ class Home extends React.Component {
                     this.props.navigation.navigate({
                       routeName: "Product",
                       params: { id },
-                      key: id
+                      key: id,
                     });
                   }}
                 />
@@ -153,13 +147,13 @@ const RNText = () => (
 );
 
 class Product extends React.Component {
-  static navigationOptions = SharedTranslateTransition.navigationOptions;
+  static navigationOptions = SharedFadeTransition.navigationOptions;
 
   render() {
     const { navigation } = this.props;
     const product = PRODUCTS[navigation.getParam("id")];
     return (
-      <SharedTranslateTransition {...this.props} ref={this.props.transitionRef}>
+      <SharedFadeTransition {...this.props} ref={this.props.transitionRef}>
         <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
           <ProductPhoto
             id={navigation.getParam("id")}
@@ -171,7 +165,7 @@ class Product extends React.Component {
               top: 0,
               left: 0,
               right: 0,
-              height: 100
+              height: 100,
             }}
           >
             <SharedText
@@ -203,7 +197,7 @@ class Product extends React.Component {
                       navigation.navigate({
                         routeName: "Product",
                         params: { id },
-                        key: id
+                        key: id,
                       });
                     }}
                     style={{ width: 80, aspectRatio: 1 }}
@@ -215,14 +209,14 @@ class Product extends React.Component {
             <RNText />
           </View>
         </ScrollView>
-      </SharedTranslateTransition>
+      </SharedFadeTransition>
     );
   }
 }
 
 const App = createTransitionNavigator({
   Home,
-  Product
+  Product,
 });
 
 export default App;
