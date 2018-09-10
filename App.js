@@ -43,7 +43,8 @@ const AppNavigator = createSwitchNavigator({
   ...EXAMPLES,
 });
 
-const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+// const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+const StatefulAppNavigator = createNavigationContainer(ExampleE);
 
 const App = () => (
   <LayoutProvider style={{ flex: 1 }}>
