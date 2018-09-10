@@ -189,6 +189,7 @@ class Product extends React.Component {
               }}
               title="Go back"
             />
+
             <View style={{ flexDirection: "row" }}>
               {Object.keys(PRODUCTS).map(id => {
                 if (id === navigation.getParam("id")) {
@@ -210,6 +211,7 @@ class Product extends React.Component {
                 );
               })}
             </View>
+
             <RNText />
           </View>
         </ScrollView>

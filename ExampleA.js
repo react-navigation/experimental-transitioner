@@ -4,7 +4,7 @@ import {
   Text as UnstyledText,
   View as UnstyledView
 } from "react-native";
-import { createStackNavigator } from "react-navigation";
+import { createNavigator, StackView, StackRouter } from "react-navigation";
 
 const View = props => (
   <UnstyledView style={{ flex: 1, justifyContent: "center" }} {...props} />
@@ -35,10 +35,18 @@ const ProfileScreen = ({ navigation }) => (
   </View>
 );
 
-const App = createStackNavigator({
-  HomeScreen,
-  ProfileScreen
-});
+const App = createNavigator(
+  StackView,
+  StackRouter({
+    HomeScreen,
+    ProfileScreen
+  }),
+  {
+    mode: "modal"
+  }
+);
+
+// const App = createNavigationContainer(AppNavigator)
 
 export default App;
 

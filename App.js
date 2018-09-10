@@ -2,7 +2,7 @@ import React from "react";
 import { View, Button } from "react-native";
 import {
   createSwitchNavigator,
-  createNavigationContainer
+  createNavigationContainer,
 } from "react-navigation";
 import ExampleA from "./ExampleA";
 import ExampleB from "./ExampleB";
@@ -33,23 +33,22 @@ const EXAMPLES = {
   ExampleC,
   ExampleD,
   ExampleE,
-  // ExampleT,
-  ExampleS
-  // ExampleZ
+  ExampleT,
+  ExampleS,
+  ExampleZ,
 };
 
 const AppNavigator = createSwitchNavigator({
   Examples,
-  ...EXAMPLES
+  ...EXAMPLES,
 });
 
-// const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+const StatefulAppNavigator = createNavigationContainer(AppNavigator);
 
 const App = () => (
   <LayoutProvider style={{ flex: 1 }}>
-    <AppNavigator />
+    <StatefulAppNavigator />
   </LayoutProvider>
 );
 
-// export default ExampleZ;
 export default App;
