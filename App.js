@@ -42,9 +42,9 @@ const AppNavigator = createSwitchNavigator({
 // const StatefulAppNavigator = createNavigationContainer(AppNavigator);
 // const StatefulAppNavigator = createNavigationContainer(Fade);
 // const StatefulAppNavigator = createNavigationContainer(Modal);
-// const StatefulAppNavigator = createNavigationContainer(Gesture);
+const StatefulAppNavigator = createNavigationContainer(Gesture);
 // const StatefulAppNavigator = createNavigationContainer(CardStack);
-const StatefulAppNavigator = createNavigationContainer(SharedEl);
+// const StatefulAppNavigator = createNavigationContainer(SharedEl);
 
 const App = () => (
   <LayoutProvider style={{ flex: 1 }}>
