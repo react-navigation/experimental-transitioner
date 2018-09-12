@@ -27,19 +27,29 @@ class FadeTransition extends React.Component {
       }),
   };
   render() {
-    const { transition, navigation } = this.props;
+    const {
+      transition,
+      navigation,
+      transitioningFromState,
+      transitioningToState,
+      transitionRouteKey,
+    } = this.props;
     const myKey = navigation.state.key;
     let opacity = 1;
     let transform = [];
-    if (transition) {
-      const { fromState, toState, progress } = transition;
-      const fromOpacity = fromState.routes.find(r => r.key === myKey) ? 1 : 0;
-      const toOpacity = toState.routes.find(r => r.key === myKey) ? 1 : 0;
+    if (transitionRouteKey && transition) {
+      const { progress } = transition;
+      const wasVisible = !!transitioningFromState.routes.find(
+        r => r.key === myKey,
+      );
+      const isVisible = !!transitioningToState.routes.find(
+        r => r.key === myKey,
+      );
+      const fromOpacity = wasVisible ? 1 : 0;
+      const toOpacity = isVisible ? 1 : 0;
 
-      const fromTranslate = fromState.routes.find(r => r.key === myKey)
-        ? 0
-        : 300;
-      const toTranslate = toState.routes.find(r => r.key === myKey) ? 0 : 300;
+      const fromTranslate = wasVisible ? 0 : 300;
+      const toTranslate = isVisible ? 0 : 300;
       opacity = interpolate(progress, {
         inputRange: [0, 1],
         outputRange: [fromOpacity, toOpacity],
