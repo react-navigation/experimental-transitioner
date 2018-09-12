@@ -206,15 +206,10 @@ export class Transitioner extends React.Component {
       descriptors,
     } = this.state;
 
-    // const { transition, navState, isTransitioning } = this.state;
     const mainRouteKeys = navState.routes.map(r => r.key);
     let routeKeys = mainRouteKeys;
-    // let toDescriptors = {};
 
     if (transitionRouteKey) {
-      //   if (transition.toDescriptors) {
-      //     toDescriptors = transition.toDescriptors;
-      //   }
       if (transitioningFromState) {
         const prevRouteKeys = transitioningFromState.routes.map(r => r.key);
         // While transitioning, our main nav state is navState. But we also need to render screens from the last state, preserving the order
@@ -232,7 +227,7 @@ export class Transitioner extends React.Component {
             descriptors[key] || transitioningFromDescriptors[key];
           const C = descriptor.getComponent();
 
-          const backScreenStyles = {}; //fixme
+          const backScreenStyles = {}; // FIX THIS:
           // const backScreenRouteKeys = routeKeys.slice(index + 1);
           // const backScreenStyles = backScreenRouteKeys.map(
           //   backScreenRouteKey => {
