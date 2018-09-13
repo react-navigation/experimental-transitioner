@@ -14,30 +14,35 @@ import { SharedView, SharedText, SharedFadeTransition } from "../Shared";
 
 const PRODUCTS = {
   A: {
-    image: "https://www.organicfacts.net/wp-content/uploads/blueberries.jpg",
+    image: {
+      // uri: "https://www.organicfacts.net/wp-content/uploads/blueberries.jpg",
+      uri: "http://localhost:8000/blueberries.jpg",
+    },
+    // image: require("../images/blueberries.jpg"),
     name: "Blueberries",
   },
   B: {
-    image:
-      "https://www.organicfacts.net/wp-content/uploads/sugarinstrawberries.jpg",
+    image: {
+      uri:
+        // "https://www.organicfacts.net/wp-content/uploads/sugarinstrawberries.jpg",
+        "http://localhost:8000/sugarinstrawberries.jpg",
+    },
+    // image: require("../images/sugarinstrawberries.jpg"),
     name: "Strawberries",
   },
   C: {
-    image:
-      "https://www.organicfacts.net/wp-content/uploads/pineapplecalories.jpg",
+    image: {
+      uri:
+        // "https://www.organicfacts.net/wp-content/uploads/pineapplecalories.jpg",
+        "http://localhost:8000/pineapplecalories.jpg",
+    },
+    // image: require("../images/pineapplecalories.jpg"),
     name: "Pineapple",
   },
 };
 
 const ProductPhoto = ({ onPress, style, id }) => {
-  const i = (
-    <Image
-      source={{
-        uri: PRODUCTS[id].image,
-      }}
-      style={{ flex: 1 }}
-    />
-  );
+  const i = <Image source={PRODUCTS[id].image} style={{ flex: 1 }} />;
   if (onPress) {
     return (
       <TouchableWithoutFeedback onPress={onPress}>

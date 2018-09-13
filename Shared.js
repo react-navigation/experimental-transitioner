@@ -51,8 +51,8 @@ const createSharedTransition = transition => {
     ...transition,
     progress,
     fromLayouts: {},
-    toLayouts: {},
-    toScreenLayout: {},
+    transitionLayouts: {},
+    transitionScreenLayout: {},
     fromScreenLayout: {},
   };
 };
@@ -67,12 +67,13 @@ const runSharedTransition = async (
   // elements and set those measurements into Animated values so that the pre-rendered
   // transition looks correct
 
-  const toRouteKey = toState.routes[toState.index].key;
-  const fromRouteKey = fromState.routes[fromState.index].key;
+  const transitionRouteKey = transition.transitionRouteKey;
+  const fromRouteKey = transition.fromRouteKey;
   const fromScreen = transitionScreenRefs[fromRouteKey].current;
-  const toScreen = transitionScreenRefs[toRouteKey].current;
+  const transitionScreen = transitionScreenRefs[transitionRouteKey].current;
   const fromSharedElements = (fromScreen && fromScreen.sharedElements) || {};
-  const toSharedElements = (toScreen && toScreen.sharedElements) || {};
+  const toSharedElements =
+    (transitionScreen && transitionScreen.sharedElements) || {};
   const sharedElementIds = Object.keys(fromSharedElements).filter(
     i => Object.keys(toSharedElements).indexOf(i) !== -1,
   );
@@ -82,27 +83,36 @@ const runSharedTransition = async (
       return await measureEl(element);
     }),
   ); // todo, collapse these into one parallel promise.all:
-  const toLayouts = await Promise.all(
+  const transitionLayouts = await Promise.all(
     sharedElementIds.map(async id => {
       const element = toSharedElements[id];
       return await measureEl(element);
     }),
   );
-  const toScreenLayout = await measureEl(toScreen.getEl());
+  const transitionScreenLayout = await measureEl(transitionScreen.getEl());
   const fromScreenLayout = await measureEl(fromScreen.getEl());
 
-  setLayoutOnKey(transition, "toScreenLayout", toScreenLayout);
+  setLayoutOnKey(transition, "transitionScreenLayout", transitionScreenLayout);
   setLayoutOnKey(transition, "fromScreenLayout", fromScreenLayout);
 
   sharedElementIds.forEach((sharedElId, index) => {
-    setLayoutOnKey(transition.toLayouts, sharedElId, toLayouts[index]);
+    setLayoutOnKey(
+      transition.transitionLayouts,
+      sharedElId,
+      transitionLayouts[index],
+    );
     setLayoutOnKey(transition.fromLayouts, sharedElId, fromLayouts[index]);
   });
+  const destValue = !!toState.routes.find(
+    r => r.key === transition.transitionRouteKey,
+  )
+    ? 1
+    : 0;
   await new Promise(resolve => {
     timing(transition.progress, {
       easing: Easing.out(Easing.cubic),
       duration: 600,
-      toValue: 1,
+      toValue: destValue,
       useNativeDriver: true,
     }).start(resolve);
   });
@@ -161,24 +171,22 @@ export class SharedFadeTransition extends React.Component {
 
 const getTransitionElementStyle = (transitionContext, screenContext, id) => {
   const transition = transitionContext.getTransition();
-  const fromState = screenContext.getTransitioningFromState();
-  const toState = screenContext.getTransitioningToState();
   const thisScreenKey = screenContext.getNavigation().state.key;
   if (!transition) {
     return [{ transform: [] }];
   }
-  const toLayout = getLayout(transition.toLayouts, id);
+  const transitionLayout = getLayout(transition.transitionLayouts, id);
   const fromLayout = getLayout(transition.fromLayouts, id);
 
-  if (!toLayout || !fromLayout) {
-    return [{ transform: [] }];
+  if (!transitionLayout || !fromLayout) {
+    throw new Error("This is unexpected");
   }
-  const toRouteKey = toState.routes[toState.index].key;
-  const fromRouteKey = fromState.routes[fromState.index].key;
-  const isToScreen = toRouteKey === thisScreenKey;
+  const transitionRouteKey = transition.transitionRouteKey;
+  const fromRouteKey = transition.fromRouteKey;
+  const isTransitionScreen = transitionRouteKey === thisScreenKey;
   const isFromScreen = fromRouteKey === thisScreenKey;
 
-  const isMeasured = and(toLayout.hasMeasured, fromLayout.hasMeasured);
+  const isMeasured = and(transitionLayout.hasMeasured, fromLayout.hasMeasured);
 
   const doInterpolate = (measureVal, start, end) =>
     interpolate(transition.progress, {
@@ -187,7 +195,7 @@ const getTransitionElementStyle = (transitionContext, screenContext, id) => {
     });
 
   const interpolateScale = (to, from) => {
-    if (isToScreen) {
+    if (isTransitionScreen) {
       return doInterpolate(1, divide(from, to), 1);
     } else if (isFromScreen) {
       return doInterpolate(1, 1, divide(to, from));
@@ -196,7 +204,7 @@ const getTransitionElementStyle = (transitionContext, screenContext, id) => {
     }
   };
   const interpolateTranslate = (toOffset, fromOffset, toScale, fromScale) => {
-    if (isToScreen) {
+    if (isTransitionScreen) {
       return doInterpolate(
         0,
         sub(
@@ -232,25 +240,25 @@ const getTransitionElementStyle = (transitionContext, screenContext, id) => {
     transform: [
       {
         translateX: translateTransform(
-          toLayout.x,
+          transitionLayout.x,
           fromLayout.x,
-          toLayout.w,
+          transitionLayout.w,
           fromLayout.w,
         ),
       },
       {
         translateY: translateTransform(
-          toLayout.y,
+          transitionLayout.y,
           fromLayout.y,
-          toLayout.h,
+          transitionLayout.h,
           fromLayout.h,
         ),
       },
       {
-        scaleX: scaleTransform(toLayout.w, fromLayout.w),
+        scaleX: scaleTransform(transitionLayout.w, fromLayout.w),
       },
       {
-        scaleY: scaleTransform(toLayout.h, fromLayout.h),
+        scaleY: scaleTransform(transitionLayout.h, fromLayout.h),
       },
     ],
   };

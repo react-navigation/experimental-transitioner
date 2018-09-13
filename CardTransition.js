@@ -46,7 +46,7 @@ const {
 } = Animated;
 const callWhenTrue = (val, callback) => cond(val, call([val], callback));
 
-const TOSS_VELOCITY_MULTIPLIER = 0.2;
+const TOSS_VELOCITY_MULTIPLIER = 0.5;
 
 export default class CardTransition extends React.Component {
   static navigationOptions = {
@@ -59,7 +59,7 @@ export default class CardTransition extends React.Component {
         transform: [
           {
             translateX: multiply(
-              -0.3,
+              -0.5,
               multiply(transition.screenWidth, transition.progress),
             ),
           },
@@ -74,7 +74,23 @@ export default class CardTransition extends React.Component {
       const gestureVelocityX = new Value(0);
       const targetProgress = new Value(0);
       const screenWidth = new Value(Dimensions.get("window").width);
-      const targetProgressDistance = multiply(targetProgress, screenWidth);
+      const lastGestureTranslateX = new Value(0);
+      const lastGestureVelocityX = new Value(0);
+
+      const isClosing = and(
+        neq(gestureState, State.ACTIVE),
+        lessThan(
+          add(
+            lastGestureTranslateX,
+            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityX),
+          ),
+          -100,
+        ),
+      );
+      const targetProgressDistance = multiply(
+        cond(isClosing, 0, targetProgress),
+        screenWidth,
+      );
       const progressDistance = new Value(0);
       const isAtRest = and(
         not(clockRunning(clock)),
@@ -82,8 +98,6 @@ export default class CardTransition extends React.Component {
       );
       const uprightGestureTranslateX = multiply(gestureTranslateX, -1);
       const uprightGestureVelocityX = multiply(gestureVelocityX, -1);
-      const lastGestureTranslateX = new Value(0);
-      const lastGestureVelocityX = new Value(0);
       const state = {
         finished: new Value(0),
         velocity: new Value(0),
@@ -92,12 +106,12 @@ export default class CardTransition extends React.Component {
       };
 
       const config = {
-        stiffness: 1000,
-        damping: 1000,
+        stiffness: 100,
+        damping: 500,
         mass: 3,
         overshootClamping: true,
-        restSpeedThreshold: 0.01,
-        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 0.1,
+        restDisplacementThreshold: 1,
         toValue: targetProgressDistance,
       };
 
@@ -110,19 +124,21 @@ export default class CardTransition extends React.Component {
         spring(clock, state, config),
         cond(state.finished, stopClock(clock)),
       ];
-
+      const gestureProgressDistance = add(
+        progressDistance,
+        sub(uprightGestureTranslateX, prevGestureTranslateX),
+      );
+      const clampedGestureProgressDistance = cond(
+        greaterThan(screenWidth, gestureProgressDistance),
+        gestureProgressDistance,
+        screenWidth,
+      );
       const springProgressDistance = block([
         cond(
           eq(gestureState, State.ACTIVE),
           [
             stopClock(clock),
-            set(
-              progressDistance,
-              add(
-                progressDistance,
-                sub(uprightGestureTranslateX, prevGestureTranslateX),
-              ),
-            ),
+            set(progressDistance, clampedGestureProgressDistance),
             set(prevGestureTranslateX, uprightGestureTranslateX),
             set(lastGestureTranslateX, uprightGestureTranslateX),
             set(lastGestureVelocityX, uprightGestureVelocityX),
@@ -141,19 +157,8 @@ export default class CardTransition extends React.Component {
           callbacksWaitingForRest.push(resolve);
         });
       const closingCallback = () => {
-        // transition.navigation.goBack(transition.transitionRouteKey);
-        targetProgress.setValue(0);
+        transition.navigation.goBack(transition.transitionRouteKey);
       };
-      const isClosing = and(
-        neq(gestureState, State.ACTIVE),
-        lessThan(
-          add(
-            lastGestureTranslateX,
-            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityX),
-          ),
-          -100,
-        ),
-      );
       const finalDistanceProgress = block([
         springProgressDistance,
         callWhenTrue(isAtRest, whenDoneCallback),
@@ -171,8 +176,9 @@ export default class CardTransition extends React.Component {
         waitForDone,
       };
     },
-    runTransition: async transition => {
-      transition.targetProgress.setValue(1);
+    runTransition: async (transition, _, fromState, toState) => {
+      const destVal = toState.index >= fromState.index ? 1 : 0;
+      transition.targetProgress.setValue(destVal);
 
       await transition.waitForDone();
     },

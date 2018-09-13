@@ -69,12 +69,14 @@ const getStateForNavChange = (props, state) => {
     state.descriptors[transitionRouteKey] ||
     state.transitioningFromDescriptors[transitionRouteKey];
   const { options } = descriptor;
+  const fromRoute = state.navState.routes[state.navState.index];
   const createTransition = options.createTransition || defaultCreateTransition;
   const transition =
     state.transitions[transitionRouteKey] ||
     createTransition({
       navigation: props.navigation,
       transitionRouteKey,
+      fromRouteKey: fromRoute.key,
     });
   return {
     transitions: {
@@ -149,7 +151,12 @@ export class Transitioner extends React.Component {
     // after async animator, this.props may have changed. re-check it now:
     if (navState === this.props.navigation.state) {
       // Navigation state is currently the exact state we were transitioning to. Set final state and we're done
+      const transitions = {}; // clear out unusued transitions
+      navState.routes.map(r => r.key).forEach(activeRouteKey => {
+        transitions[activeRouteKey] = state.transitions[activeRouteKey];
+      });
       this.setState({
+        transitions,
         transitionRouteKey: null,
         transitioningFromState: null,
         transitioningFromDescriptors: {},
@@ -205,7 +212,6 @@ export class Transitioner extends React.Component {
       navState,
       descriptors,
     } = this.state;
-
     const mainRouteKeys = navState.routes.map(r => r.key);
     let routeKeys = mainRouteKeys;
 
@@ -227,25 +233,32 @@ export class Transitioner extends React.Component {
             descriptors[key] || transitioningFromDescriptors[key];
           const C = descriptor.getComponent();
 
-          const backScreenStyles = {}; // FIX THIS:
-          // const backScreenRouteKeys = routeKeys.slice(index + 1);
-          // const backScreenStyles = backScreenRouteKeys.map(
-          //   backScreenRouteKey => {
-          //     const backScreenDescriptor =
-          //       toDescriptors[backScreenRouteKey] ||
-          //       this.state.descriptors[backScreenRouteKey];
-          //     const { options } = backScreenDescriptor;
-          //     if (!transition || !options.getBehindTransitionAnimatedStyle) {
-          //       return {};
-          //     }
-          //     return options.getBehindTransitionAnimatedStyle(transition);
-          //   },
-          // );
+          const aboveScreenRouteKeys = routeKeys.slice(index + 1);
+          let behindScreenStyles = aboveScreenRouteKeys.map(
+            (aboveScreenRouteKey, behindScreenRouteIndex) => {
+              const aboveTransition = transitions[aboveScreenRouteKey];
+              const aboveScreenDescriptor =
+                descriptors[aboveScreenRouteKey] ||
+                transitioningFromDescriptors[aboveScreenRouteKey];
+              const { options } = aboveScreenDescriptor;
+              if (
+                !aboveTransition ||
+                !options.getBehindTransitionAnimatedStyle
+              ) {
+                return {};
+              }
+              return options.getBehindTransitionAnimatedStyle(aboveTransition);
+            },
+          );
           let transition = transitions[key];
-
+          if (behindScreenStyles.length === 0) {
+            // bizarre react-native bug that refuses to clear Animated.View styles unless you do something like this..
+            // to reproduce the problem, set a getBehindTransitionAnimatedStyle that puts opacity at 0.5
+            behindScreenStyles = [{ opacity: 1 }];
+          }
           return (
             <Animated.View
-              style={[{ ...StyleSheet.absoluteFillObject }, backScreenStyles]}
+              style={[{ ...StyleSheet.absoluteFillObject }, behindScreenStyles]}
               pointerEvents={"auto"}
               key={key}
             >

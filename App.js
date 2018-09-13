@@ -39,10 +39,11 @@ const AppNavigator = createSwitchNavigator({
   ...EXAMPLES,
 });
 
-// const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+
 // const StatefulAppNavigator = createNavigationContainer(Fade);
 // const StatefulAppNavigator = createNavigationContainer(Modal);
-const StatefulAppNavigator = createNavigationContainer(Gesture);
+// const StatefulAppNavigator = createNavigationContainer(Gesture);
 // const StatefulAppNavigator = createNavigationContainer(CardStack);
 // const StatefulAppNavigator = createNavigationContainer(SharedEl);
 
