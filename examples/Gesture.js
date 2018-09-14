@@ -13,6 +13,7 @@ import { PanGestureHandler, State } from "react-native-gesture-handler";
 const {
   Value,
   timing,
+  or,
   interpolate,
   Clock,
   add,
@@ -43,7 +44,7 @@ const TOSS_VELOCITY_MULTIPLIER = 0.2;
 
 const callWhenTrue = (val, callback) => cond(val, call([val], callback));
 
-class FadeTransition extends React.Component {
+class GestureTransition extends React.Component {
   static navigationOptions = {
     createTransition: transition => {
       const clock = new Clock();
@@ -52,10 +53,7 @@ class FadeTransition extends React.Component {
       const prevGestureTranslateY = new Value(0);
       const gestureVelocityY = new Value(0);
       const targetProgress = new Value(0);
-      const targetProgressDistance = multiply(
-        targetProgress,
-        MODAL_TRANSLATE_DIST,
-      );
+
       const progressDistance = new Value(0);
       const isAtRest = and(
         not(clockRunning(clock)),
@@ -72,13 +70,27 @@ class FadeTransition extends React.Component {
         time: new Value(0),
       };
 
+      const isClosing = and(
+        neq(gestureState, State.ACTIVE),
+        lessThan(
+          add(
+            lastGestureTranslateY,
+            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityY),
+          ),
+          -100,
+        ),
+      );
+      const targetProgressDistance = multiply(
+        cond(isClosing, 0, targetProgress),
+        MODAL_TRANSLATE_DIST,
+      );
       const config = {
-        stiffness: 100,
+        stiffness: 1000,
         damping: 500,
         mass: 3,
         overshootClamping: true,
         restSpeedThreshold: 0.01,
-        restDisplacementThreshold: 0.01,
+        restDisplacementThreshold: 1,
         toValue: targetProgressDistance,
       };
 
@@ -93,19 +105,16 @@ class FadeTransition extends React.Component {
       ];
 
       const springProgressDistance = block([
-        debug("XXX", state.position),
+        state.position,
         cond(
           eq(gestureState, State.ACTIVE),
           [
             stopClock(clock),
-            debug(
-              "DDD",
-              set(
+            set(
+              progressDistance,
+              add(
                 progressDistance,
-                add(
-                  progressDistance,
-                  sub(uprightGestureTranslateY, prevGestureTranslateY),
-                ),
+                sub(uprightGestureTranslateY, prevGestureTranslateY),
               ),
             ),
             set(prevGestureTranslateY, uprightGestureTranslateY),
@@ -128,16 +137,7 @@ class FadeTransition extends React.Component {
       const closingCallback = () => {
         transition.navigation.goBack(transition.transitionRouteKey);
       };
-      const isClosing = and(
-        neq(gestureState, State.ACTIVE),
-        lessThan(
-          add(
-            lastGestureTranslateY,
-            multiply(TOSS_VELOCITY_MULTIPLIER, lastGestureVelocityY),
-          ),
-          -100,
-        ),
-      );
+
       const finalDistanceProgress = block([
         springProgressDistance,
         callWhenTrue(isAtRest, whenDoneCallback),
@@ -154,8 +154,9 @@ class FadeTransition extends React.Component {
         waitForRest,
       };
     },
-    runTransition: async transition => {
-      transition.targetProgress.setValue(1);
+    runTransition: async (transition, _, fromState, toState) => {
+      const destVal = toState.index >= fromState.index ? 1 : 0;
+      transition.targetProgress.setValue(destVal);
 
       await transition.waitForRest();
     },
@@ -188,39 +189,25 @@ class FadeTransition extends React.Component {
     );
   };
   render() {
-    const { transition, navigation } = this.props;
-    const myKey = navigation.state.key;
-    let opacity = 1;
-    let transform = [];
+    const { transition } = this.props;
     if (!transition) {
       return this._renderModal([], 1);
     }
     const {
-      fromState,
-      toState,
       progress,
       gestureState,
       gestureTranslateY,
       gestureVelocityY,
     } = transition;
-    const fromOpacity = fromState.routes.find(r => r.key === myKey) ? 1 : 0;
-    const toOpacity = toState.routes.find(r => r.key === myKey) ? 1 : 0;
-
-    const fromTranslate = fromState.routes.find(r => r.key === myKey)
-      ? 0
-      : MODAL_TRANSLATE_DIST;
-    const toTranslate = toState.routes.find(r => r.key === myKey)
-      ? 0
-      : MODAL_TRANSLATE_DIST;
-    opacity = interpolate(progress, {
+    const opacity = interpolate(progress, {
       inputRange: [0, 1],
-      outputRange: [fromOpacity, toOpacity],
+      outputRange: [0, 1],
     });
-    transform = [
+    const transform = [
       {
         translateY: interpolate(progress, {
           inputRange: [0, 1],
-          outputRange: [fromTranslate, toTranslate],
+          outputRange: [300, 0],
         }),
       },
     ];
@@ -284,11 +271,11 @@ class HomeScreen extends React.Component {
 }
 
 class ProfileScreen extends React.Component {
-  static navigationOptions = FadeTransition.navigationOptions;
+  static navigationOptions = GestureTransition.navigationOptions;
   render() {
     const { navigation } = this.props;
     return (
-      <FadeTransition {...this.props}>
+      <GestureTransition {...this.props}>
         <View>
           <Text>
             {navigation.getParam("name")}
@@ -296,7 +283,7 @@ class ProfileScreen extends React.Component {
           </Text>
           <Button onPress={() => navigation.goBack()} title="Go Back" />
         </View>
-      </FadeTransition>
+      </GestureTransition>
     );
   }
 }

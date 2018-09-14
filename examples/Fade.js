@@ -54,13 +54,24 @@ class ProfileScreen extends React.Component {
       }),
   };
   render() {
-    const { transition, navigation } = this.props;
+    const {
+      transition,
+      navigation,
+      transitioningFromState,
+      transitioningToState,
+    } = this.props;
     const myKey = navigation.state.key;
     let opacity = 1;
-    if (transition) {
-      const { fromState, toState, progress } = transition;
-      const fromOpacity = fromState.routes.find(r => r.key === myKey) ? 1 : 0;
-      const toOpacity = toState.routes.find(r => r.key === myKey) ? 1 : 0;
+    if (transition && transitioningFromState) {
+      const { progress } = transition;
+      const fromOpacity = transitioningFromState.routes.find(
+        r => r.key === myKey,
+      )
+        ? 1
+        : 0;
+      const toOpacity = transitioningToState.routes.find(r => r.key === myKey)
+        ? 1
+        : 0;
       opacity = interpolate(progress, {
         inputRange: [0, 1],
         outputRange: [fromOpacity, toOpacity],

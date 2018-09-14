@@ -1,29 +1,16 @@
 import React from "react";
 import {
-  StyleSheet,
   Text,
   Button,
   View,
-  TextInput,
   TouchableWithoutFeedback,
-  Easing,
   Image,
-  TouchableHighlight,
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import Animated from "react-native-reanimated";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
-import { createNavigationContainer } from "react-navigation";
 import createTransitionNavigator from "../Transitioner";
-import { Provider, InsetView, KeyboardAvoiding } from "../LayoutContext";
-import BasicModalTransition from "../BasicModalTransition";
-import CardTransition from "../CardTransition";
-import FadeTransition from "../FadeTransition";
 
 import { SharedView, SharedText, SharedFadeTransition } from "../Shared";
-
-const { interpolate, Value, event, divide, multiply } = Animated;
 
 const PRODUCTS = {
   A: {

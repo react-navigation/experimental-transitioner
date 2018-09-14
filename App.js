@@ -12,6 +12,8 @@ import SharedEl from "./examples/SharedEl";
 
 import { Provider as LayoutProvider } from "./LayoutContext";
 
+process.env.REACT_NAV_LOGGING = true;
+
 const Examples = ({ navigation }) => (
   <View style={{ flex: 1, justifyContent: "center" }}>
     {Object.keys(EXAMPLES).map(exampleName => (
@@ -37,10 +39,10 @@ const AppNavigator = createSwitchNavigator({
   ...EXAMPLES,
 });
 
-const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+// const StatefulAppNavigator = createNavigationContainer(AppNavigator);
 // const StatefulAppNavigator = createNavigationContainer(Fade);
 // const StatefulAppNavigator = createNavigationContainer(Modal);
-// const StatefulAppNavigator = createNavigationContainer(Gesture);
+const StatefulAppNavigator = createNavigationContainer(Gesture);
 // const StatefulAppNavigator = createNavigationContainer(CardStack);
 // const StatefulAppNavigator = createNavigationContainer(SharedEl);
 
