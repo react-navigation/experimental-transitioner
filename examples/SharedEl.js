@@ -15,28 +15,22 @@ import { SharedView, SharedText, SharedFadeTransition } from "../Shared";
 const PRODUCTS = {
   A: {
     image: {
-      // uri: "https://www.organicfacts.net/wp-content/uploads/blueberries.jpg",
-      uri: "http://localhost:8000/blueberries.jpg",
+      uri: "https://www.organicfacts.net/wp-content/uploads/blueberries.jpg",
     },
-    // image: require("../images/blueberries.jpg"),
     name: "Blueberries",
   },
   B: {
     image: {
       uri:
-        // "https://www.organicfacts.net/wp-content/uploads/sugarinstrawberries.jpg",
-        "http://localhost:8000/sugarinstrawberries.jpg",
+        "https://www.organicfacts.net/wp-content/uploads/sugarinstrawberries.jpg",
     },
-    // image: require("../images/sugarinstrawberries.jpg"),
     name: "Strawberries",
   },
   C: {
     image: {
       uri:
-        // "https://www.organicfacts.net/wp-content/uploads/pineapplecalories.jpg",
-        "http://localhost:8000/pineapplecalories.jpg",
+        "https://www.organicfacts.net/wp-content/uploads/pineapplecalories.jpg",
     },
-    // image: require("../images/pineapplecalories.jpg"),
     name: "Pineapple",
   },
 };

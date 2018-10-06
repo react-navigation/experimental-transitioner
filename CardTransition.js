@@ -106,8 +106,8 @@ export default class CardTransition extends React.Component {
       };
 
       const config = {
-        stiffness: 100,
-        damping: 500,
+        stiffness: 1000,
+        damping: 600,
         mass: 3,
         overshootClamping: true,
         restSpeedThreshold: 0.1,
