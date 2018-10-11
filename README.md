@@ -1,6 +1,6 @@
-# React Navigation Stack
+# React Navigation Transitioner
 
-[![CircleCI badge](https://circleci.com/gh/react-navigation/react-navigation-stack/tree/master.svg?style=shield)](https://circleci.com/gh/react-navigation/react-navigation-stack/tree/master)
+[![CircleCI badge](https://circleci.com/gh/react-navigation/react-navigation-transitioner/tree/master.svg?style=shield)](https://circleci.com/gh/react-navigation/react-navigation-transitioner/tree/master)
 
 Stack navigator for use on iOS and Android.
 
@@ -9,22 +9,9 @@ Stack navigator for use on iOS and Android.
 Open a Terminal in your project's folder and run,
 
 ```sh
-yarn add react-navigation-stack
+yarn add react-navigation-transitioner
 ```
 
 ## Usage
 
-```js
-import { createStackNavigator } from 'react-navigation-stack';
-
-export default createStackNavigator({
-  Inbox: InboxScreen
-  Drafts: DraftsScreen,
-}, {
-  initialRouteName: 'Inbox',
-});
-```
-
-## Docs
-
-Documentation can be found on the [React Navigation website](https://reactnavigation.org/docs/en/stack-navigator.html).
+Coming soon, see examples.
