@@ -1,11 +1,30 @@
-# react-navigation-transitioner
-A navigator for custom screen transitions with React Navigation and React Native
+# React Navigation Stack
 
-## Watch the talk at ReactNativeEU!
+[![CircleCI badge](https://circleci.com/gh/react-navigation/react-navigation-stack/tree/master.svg?style=shield)](https://circleci.com/gh/react-navigation/react-navigation-stack/tree/master)
 
-## Get Started
+Stack navigator for use on iOS and Android.
 
+## Installation
+
+Open a Terminal in your project's folder and run,
+
+```sh
+yarn add react-navigation-stack
 ```
-yarn
-react-native run-ios
+
+## Usage
+
+```js
+import { createStackNavigator } from 'react-navigation-stack';
+
+export default createStackNavigator({
+  Inbox: InboxScreen
+  Drafts: DraftsScreen,
+}, {
+  initialRouteName: 'Inbox',
+});
 ```
+
+## Docs
+
+Documentation can be found on the [React Navigation website](https://reactnavigation.org/docs/en/stack-navigator.html).

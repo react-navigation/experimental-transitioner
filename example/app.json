@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "React Navigation Transitioner Example",
+    "description": "Demonstrates the various capabilities of react-navigation-transitioner",
+    "slug": "react-navigation-transitioner-demo",
+    "sdkVersion": "30.0.0",
+    "version": "1.0.0",
+    "primaryColor": "#2196f3",
+    "packagerOpts": {
+      "assetExts": ["ttf"],
+      "config": "./rn-cli.config.js",
+      "projectRoots": ""
+    }
+  }
+}
