@@ -109,6 +109,10 @@ export class Transitioner extends React.Component {
   _transitionRefs = {};
 
   static getDerivedStateFromProps = (props, state) => {
+    // Transition first route
+    if (state.isUnmounted) {
+      return getStateForNavChange(props, state);
+    }
     // Transition only happens when nav state changes
     if (props.navigation.state === state.navState) {
       return state;
