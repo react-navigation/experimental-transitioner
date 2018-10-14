@@ -58,7 +58,7 @@ const defaultRenderScreen = (
 );
 
 const defaultRenderContainer = (transitionRouteKey, transitions, navigation,
-  transitioningFromState, transitionRouteKey, children) => (
+  transitioningFromState, transitioningToState, transitionRefs, children) => (
   <React.Fragment>{children}</React.Fragment>
 );
 
