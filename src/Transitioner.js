@@ -37,6 +37,31 @@ const defaultCreateTransition = transition => {
 
 const defaultRunTransition = () => {};
 
+const defaultRenderScreen = (
+  ScreenComponent, transition, transitions, transitioningFromState,
+  transitioningToState, transitionRouteKey, navigation, ref, behindScreenStyles,
+) => (
+  <Animated.View
+    style={[{ ...StyleSheet.absoluteFillObject }, behindScreenStyles]}
+    pointerEvents={'auto'}
+    key={key}
+  >
+    <ScreenComponent
+      transition={transition}
+      transitions={transitions}
+      transitioningFromState={transitioningFromState}
+      transitioningToState={transitioningToState}
+      transitionRouteKey={transitionRouteKey}
+      navigation={navigation}
+      transitionRef={ref}
+    />
+  </Animated.View>
+);
+
+const defaultRenderContainer = (children) => (
+  <React.Fragment>{children}</React.Fragment>
+);
+
 const getStateForNavChange = (props, state) => {
   // by this point we know the nav state has changed and it is safe to provide a new state. static
   // getDerivedStateFromProps will never interrupt a transition (when there is state.transitionRouteKey),
@@ -208,6 +233,7 @@ export class Transitioner extends React.Component {
       navState,
       descriptors,
     } = this.state;
+    const { navigationConfig, navigation } = this.props;
     const mainRouteKeys = navState.routes.map(r => r.key);
     let routeKeys = mainRouteKeys;
 
@@ -219,9 +245,16 @@ export class Transitioner extends React.Component {
       }
     }
 
+    // Use render container function from last route descriptor
+    const renderContainerFunc = navigationConfig && navigationConfig.navigationOptions
+      && navigationConfig.navigationOptions.renderContainer
+      || defaultRenderContainer;
+
     return (
       <TransitionContext.Provider value={this._transitionContext}>
-        {routeKeys.map((key, index) => {
+        {renderContainerFunc(transitionRouteKey, transitions, navigation,
+          transitioningFromState, transitionRouteKey ? navigation.state : null,
+          routeKeys.map((key, index) => {
           const ref =
             this._transitionRefs[key] ||
             (this._transitionRefs[key] = React.createRef());
@@ -246,34 +279,25 @@ export class Transitioner extends React.Component {
               return options.getBehindTransitionAnimatedStyle(aboveTransition);
             }
           );
+
           let transition = transitions[key];
           if (behindScreenStyles.length === 0) {
             // bizarre react-native bug that refuses to clear Animated.View styles unless you do something like this..
             // to reproduce the problem, set a getBehindTransitionAnimatedStyle that puts opacity at 0.5
             behindScreenStyles = [{ opacity: 1 }];
           }
+
+          const renderFunc = descriptor.options.renderScreen || defaultRenderScreen;
+          
           return (
-            <Animated.View
-              style={[{ ...StyleSheet.absoluteFillObject }, behindScreenStyles]}
-              pointerEvents={'auto'}
-              key={key}
-            >
-              <NavigationProvider value={descriptor.navigation}>
-                <C
-                  transition={transition}
-                  transitions={transitions}
-                  transitioningFromState={transitioningFromState}
-                  transitioningToState={
-                    transitionRouteKey ? this.props.navigation.state : null
-                  }
-                  transitionRouteKey={transitionRouteKey}
-                  navigation={descriptor.navigation}
-                  transitionRef={ref}
-                />
-              </NavigationProvider>
-            </Animated.View>
+            <NavigationProvider value={descriptor.navigation}>              
+              {renderFunc(C, transition, transitions, transitioningFromState,
+                transitionRouteKey ? navigation.state : null,
+                transitionRouteKey, descriptor.navigation, ref, 
+                behindScreenStyles)}
+            </NavigationProvider>            
           );
-        })}
+        }))}
       </TransitionContext.Provider>
     );
   }
