@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, InteractionManager } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { NavigationProvider } from 'react-navigation';
 
@@ -46,7 +46,7 @@ const getStateForNavChange = (props, state) => {
 
   // Transitions are requested by setting nav state.isTransitioning to true.
   // If false, we set the state immediately without transition
-  if (!nextNavState.isTransitioning) {
+  if (!nextNavState.isTransitioning && !state.isUnmounted) {
     return {
       transitions: state.transitions,
       transitionRouteKey: null,
@@ -54,6 +54,7 @@ const getStateForNavChange = (props, state) => {
       transitioningFromDescriptors: null,
       navState: nextNavState,
       descriptors: props.descriptors,
+      isUnmounted: false,
     };
   }
   const transitionRouteKey = getTransitionOwnerRouteKey(
@@ -84,6 +85,7 @@ const getStateForNavChange = (props, state) => {
     transitioningFromDescriptors: state.descriptors,
     navState: nextNavState,
     descriptors: props.descriptors,
+    isUnmounted: false,
   };
 };
 
@@ -99,6 +101,8 @@ export class Transitioner extends React.Component {
     // this is the current navigation state and descriptors:
     navState: this.props.navigation.state,
     descriptors: this.props.descriptors,
+    // Track if we are mounted or not to be able to run startup transitions
+    isUnmounted: true,
   };
 
   // never re-assign this!
@@ -168,6 +172,24 @@ export class Transitioner extends React.Component {
     } else {
       // Navigation state prop has changed during the transtion! Schedule another transition
       this.setState(getStateForNavChange(this.props, state));
+    }
+  }
+
+  async componentDidMount() {
+    const { transitionRouteKey } = this.state;
+    // run the initial transition. This one is a bit special, since
+    // the navState is not in transitioning mode. Try to see if we can find a
+    // transition for the first screen
+    if (
+      // If we are transitioning
+      transitionRouteKey
+    ) {
+      InteractionManager.runAfterInteractions(() => this._startTransition().then(
+        () => {},
+        e => {
+          console.error('Error running transition:', e);
+        },
+      ));
     }
   }
 
