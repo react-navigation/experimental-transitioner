@@ -57,7 +57,8 @@ const defaultRenderScreen = (
   </Animated.View>
 );
 
-const defaultRenderContainer = (children) => (
+const defaultRenderContainer = (transitionRouteKey, transitions, navigation,
+  transitioningFromState, transitionRouteKey, children) => (
   <React.Fragment>{children}</React.Fragment>
 );
 
