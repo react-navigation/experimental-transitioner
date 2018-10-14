@@ -171,14 +171,14 @@ export class Transitioner extends React.Component {
     }
 
     const { finishTransition } = descriptor.options;
-    if(finishTransition) {
+    if (finishTransition) {
       await finishTransition(
         transition,
         this._transitionRefs,
         transitioningFromState,
         navState,
       );
-    }    
+    }
   }
 
   componentDidUpdate(lastProps, lastState) {
