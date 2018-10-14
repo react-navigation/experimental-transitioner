@@ -169,6 +169,16 @@ export class Transitioner extends React.Component {
       // Navigation state prop has changed during the transtion! Schedule another transition
       this.setState(getStateForNavChange(this.props, state));
     }
+
+    const { finishTransition } = descriptor.options;
+    if(finishTransition) {
+      await finishTransition(
+        transition,
+        this._transitionRefs,
+        transitioningFromState,
+        navState,
+      );
+    }    
   }
 
   componentDidUpdate(lastProps, lastState) {
