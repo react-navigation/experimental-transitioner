@@ -233,7 +233,7 @@ export class Transitioner extends React.Component {
       navState,
       descriptors,
     } = this.state;
-    const { navigationConfig, navigation } = this.props;
+    const { navigation } = this.props;
     const mainRouteKeys = navState.routes.map(r => r.key);
     let routeKeys = mainRouteKeys;
 
@@ -246,8 +246,7 @@ export class Transitioner extends React.Component {
     }
 
     // Use render container function from last route descriptor
-    const renderContainerFunc = navigationConfig && navigationConfig.navigationOptions
-      && navigationConfig.navigationOptions.renderContainer
+    const renderContainerFunc = descriptors[transitionRouteKey].options.renderContainer
       || defaultRenderContainer;
 
     return (
