@@ -14,7 +14,7 @@
     "test": "jest",
     "lint": "eslint .",
     "format": "eslint . --fix",
-    "build": "babel --no-babelrc --plugins=syntax-jsx,syntax-class-properties,syntax-object-rest-spread,transform-flow-strip-types src --copy-files --out-dir dist --ignore '**/__tests__/**'",
+    "build": "babel --no-babelrc --plugins=transform-react-jsx,transform-class-properties,transform-object-rest-spread,transform-flow-strip-types src --copy-files --out-dir dist --ignore '**/__tests__/**'",
     "prepare": "yarn build"
   },
   "keywords": [
@@ -36,14 +36,16 @@
     "url": "https://github.com/react-navigation/react-navigation-transitioner/issues"
   },
   "homepage": "https://github.com/react-navigation/react-navigation-transitioner#readme",
-  "dependencies": {},
+  "dependencies": {
+    "react-native-reanimated": "^1.0.0-alpha.10"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-jest": "^22.4.1",
-    "babel-plugin-syntax-class-properties": "^6.13.0",
-    "babel-plugin-syntax-jsx": "^6.18.0",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.13.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-react-jsx": "^6.18.0",
     "babel-preset-react-native": "^4.0.0",
     "eslint": "^4.12.1",
     "eslint-config-satya164": "^1.0.1",
@@ -54,16 +56,13 @@
     "react": "16.3.1",
     "react-dom": "16.3.1",
     "react-native": "~0.55.4",
-    "react-navigation": "^2.17.0",
     "react-test-renderer": "16.3.1"
   },
   "peerDependencies": {
+    "@react-navigation/core": "*",
+    "@react-navigation/native": "*",
     "react": "*",
-    "react-native": "*",
-    "react-native-gesture-handler": "^1.0.0",
-    "react-native-reanimated": "^1.0.0 || ^1.0.0-alpha",
-    "react-native-screens": "^1.0.0 || ^1.0.0-alpha",
-    "react-navigation": ">=2.0 || ^2.0.0-beta"
+    "react-native": "*"
   },
   "jest": {
     "preset": "react-native",

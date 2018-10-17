@@ -1,6 +1,6 @@
 import React from 'react';
 import Animated, { Easing } from 'react-native-reanimated';
-const { Value, timing, interpolate } = Animated;
+const { Value, timing } = Animated;
 
 export default class FadeTransition extends React.Component {
   static navigationOptions = {
@@ -12,7 +12,6 @@ export default class FadeTransition extends React.Component {
       const isVisible = !!toState.routes.find(
         r => r.key === transition.transitionRouteKey
       );
-      console.log('running fade transition! ', isVisible);
       await new Promise(resolve => {
         timing(transition.opacity, {
           toValue: isVisible ? 1 : 0,
@@ -23,19 +22,10 @@ export default class FadeTransition extends React.Component {
     },
   };
   render() {
-    const { transition, navigation } = this.props;
-    const myKey = navigation.state.key;
+    const { transition } = this.props;
     let opacity = 1;
     if (transition) {
       opacity = transition.opacity;
-
-      // const { fromState, toState, progress } = transition;
-      // const fromOpacity = fromState.routes.find(r => r.key === myKey) ? 1 : 0;
-      // const toOpacity = toState.routes.find(r => r.key === myKey) ? 1 : 0;
-      // opacity = interpolate(progress, {
-      //   inputRange: [0, 1],
-      //   outputRange: [fromOpacity, toOpacity],
-      // });
     }
     return (
       <Animated.View style={{ flex: 1, opacity }}>

@@ -4,7 +4,7 @@ import {
   Text as UnstyledText,
   View as UnstyledView,
 } from 'react-native';
-import { createNavigator, StackRouter } from 'react-navigation';
+import { createNavigator, StackRouter } from '@react-navigation/core';
 import { Transitioner } from 'react-navigation-transitioner';
 import FadeTransition from '../FadeTransition';
 
@@ -63,7 +63,8 @@ const App = createNavigator(
   StackRouter({
     HomeScreen,
     ProfileScreen,
-  })
+  }),
+  {}
 );
 
 export default App;

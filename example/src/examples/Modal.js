@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { createNavigator, StackRouter } from 'react-navigation';
+import { createNavigator, StackRouter } from '@react-navigation/core';
 import { Transitioner } from 'react-navigation-transitioner';
 import Animated, { Easing } from 'react-native-reanimated';
 const { Value, timing, interpolate } = Animated;
@@ -146,7 +146,8 @@ const App = createNavigator(
   StackRouter({
     HomeScreen,
     ProfileScreen,
-  })
+  }),
+  {}
 );
 
 export default App;
