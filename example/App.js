@@ -2,10 +2,8 @@ import React from 'react';
 import Expo from 'expo';
 
 import { View, Button } from 'react-native';
-import {
-  createSwitchNavigator,
-  createNavigationContainer,
-} from 'react-navigation';
+import { createSwitchNavigator } from '@react-navigation/core';
+import { createAppContainer } from '@react-navigation/native';
 import Fade from './src/examples/Fade';
 import Modal from './src/examples/Modal';
 import Gesture from './src/examples/Gesture';
@@ -41,13 +39,13 @@ const AppNavigator = createSwitchNavigator({
   ...EXAMPLES,
 });
 
-const StatefulAppNavigator = createNavigationContainer(AppNavigator);
+const StatefulAppNavigator = createAppContainer(AppNavigator);
 
-// const StatefulAppNavigator = createNavigationContainer(Fade);
-// const StatefulAppNavigator = createNavigationContainer(Modal);
-// const StatefulAppNavigator = createNavigationContainer(Gesture);
-// const StatefulAppNavigator = createNavigationContainer(CardStack);
-// const StatefulAppNavigator = createNavigationContainer(SharedEl);
+// const StatefulAppNavigator = createAppContainer(Fade);
+// const StatefulAppNavigator = createAppContainer(Modal);
+// const StatefulAppNavigator = createAppContainer(Gesture);
+// const StatefulAppNavigator = createAppContainer(CardStack);
+// const StatefulAppNavigator = createAppContainer(SharedEl);
 
 const App = () => (
   <LayoutProvider style={{ flex: 1 }}>
